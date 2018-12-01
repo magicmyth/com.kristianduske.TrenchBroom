@@ -11,12 +11,16 @@ finish-args:
 - --socket=wayland
 - --socket=x11
 - --share=ipc
+- --persist=.TrenchBroom
+- --filesystem=xdg-documents
 
 cleanup:
-- /app/include
-- /app/lib/*.a
-- /app/lib/*.la
-- /app/lib/pkgconfig
+- /include
+- /lib/*.a
+- /lib/*.la
+- /lib/pkgconfig
+- /bin/pandoc
+- /bin/pandoc-citeproc
 
 modules:
 
@@ -43,10 +47,21 @@ modules:
     path: freeimage-fix-install.patch
     strip-components: 0
 
+- name: pandoc
+  buildsystem: simple
+  build-commands:
+  - install -Dm755 bin/pandoc /app/bin/pandoc
+  - install -Dm755 bin/pandoc-citeproc /app/bin/pandoc-citeproc
+  sources:
+  - type: archive
+    url: https://github.com/jgm/pandoc/releases/download/2.5/pandoc-2.5-linux.tar.gz
+    sha256: e33e1c7d6518b6cdc9b29ce8de37cc577fc8de2c039b33a3304863196fa59769
+
 - name: trenchbroom
   buildsystem: cmake-ninja
   config-opts:
   - -DCMAKE_BUILD_TYPE=Release
+  - -DwxWidgets_PREFIX=/app
   sources:
   - type: archive
     url: https://github.com/kduske/TrenchBroom/archive/v2.0.5.tar.gz
@@ -65,6 +80,6 @@ modules:
     sha256: 9edb0d713fde4c7417fa4b3f7037974a1dedb9e3099e1202a8b744ed6f30b314
   post-install:
   - install -D trenchbroom.sh /app/bin/trenchbroom.sh
-  - install -D trenchbroom.desktop /app/share/applications/
-  - install -D com.kristianduske.TrenchBroom.appdata.xml /app/share/appdata/
+  - install -D trenchbroom.desktop /app/share/applications/trenchbroom.desktop
+  - install -D com.kristianduske.TrenchBroom.appdata.xml /app/share/appdata/com.kristianduske.TrenchBroom.appdata.xml
   - install -D icon_256.png /app/share/icons/hicolor/256x256/apps/trenchbroom.png
